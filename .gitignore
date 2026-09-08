@@ -1,7 +1,6 @@
 # Global Ignore Rules (Log/Build Files)
 *.vcd
 *.fst
-*.log
 *.o
 *.a
 *.d
