@@ -1,35 +1,11 @@
-# Custom PDN configuration for A06_BH_top_wrapper -- REV 3
-#
-# REV 1 (ring + -connect_to_pads) worked electrically: DRC clean, LVS
-# exact match, no routing congestion regression, ring geometry
-# genuinely reached the die boundary. Its ONLY problem was overshoot:
-# VOFFSET/HOFFSET=6 + width=1.6 already exceeds the 5um margin between
-# CORE_AREA (5,5)-(1105,545) and DIE_AREA (0,0)-(1110,550), guaranteeing
-# ring geometry past x=0/x=1110/y=0/y=550.
-#
-# REV 2 (Metal2 stripe + explicit connect to Metal4) hit a structural
-# OpenROAD PDN limitation instead: declaring add_pdn_connect between a
-# full-coverage layer (Metal4) and a single boundary-only stripe
-# (Metal2) makes the channel-repair engine try to bridge the entire
-# core-sized coverage gap, which it can't -- failed identically twice,
-# independent of the -pins list, so removing Metal2 from -pins was NOT
-# the fix. Abandoning that approach.
-#
-# REV 3 goes back to REV 1's proven mechanism, just with the ring
-# shrunk to fit inside the real 5um margin:
-#   VOFFSET/HOFFSET: 6 -> 1
-#   width: unchanged at 1.6 (this value didn't cause the overshoot by
-#     itself, so no reason to shrink it further -- 1(offset)+1.6(width)
-#     = 2.6um, leaving ~2.4um of buffer inside the 5um margin)
-#
-# MANDATORY: after running, re-check the boundary script (grep/awk
-# against results/final/def/<DESIGN_NAME>.def) BEFORE trusting this --
-# via arrays at ring corners can add a small amount of extra overhang
-# beyond the drawn rectangle, so confirm the actual final geometry,
-# don't just trust this arithmetic.
+# Custom PDN configuration for A06_BH_top_wrapper -- REV 4 (Fixed Pad-to-Ring Connection)
 
 source $::env(SCRIPTS_DIR)/openroad/common/set_global_connections.tcl
 set_global_connections
+
+# --- ADDED: Explicit global connections for Pad frame power/ground pins ---
+add_global_connection -net $::env(VDD_NET) -inst_pattern {.*} -pin_pattern {^(VDD|DVDD|VDDIO)$} -power
+add_global_connection -net $::env(GND_NET) -inst_pattern {.*} -pin_pattern {^(VSS|DVSS|VSSIO)$} -ground
 
 set secondary {}
 foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
@@ -59,7 +35,7 @@ foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
 set_voltage_domain -name CORE -power $::env(VDD_NET) -ground $::env(GND_NET) \
     -secondary_power $secondary
 
-# --- Main stdcell grid (proven-working, unchanged from REV 1) ---
+# --- Main stdcell grid ---
 if { $::env(FP_PDN_MULTILAYER) == 1 } {
     define_pdn_grid \
         -name stdcell_grid \
@@ -104,7 +80,7 @@ if { $::env(FP_PDN_MULTILAYER) == 1 } {
         -starts_with POWER -extend_to_core_ring
 }
 
-# Standard cell rails (unchanged)
+# Standard cell rails
 if { $::env(FP_PDN_ENABLE_RAILS) == 1 } {
     add_pdn_stripe \
         -grid stdcell_grid \
@@ -118,11 +94,7 @@ if { $::env(FP_PDN_ENABLE_RAILS) == 1 } {
         -layers "$::env(FP_PDN_RAIL_LAYER) $::env(FP_PDN_VERTICAL_LAYER)"
 }
 
-# --- Core ring on Metal4/Metal5, WITH -connect_to_pads (proven to
-#     genuinely reach the pad boundary electrically). Ring shrunk to
-#     fit inside the real 5um CORE_AREA-to-DIE_AREA margin: use
-#     FP_PDN_CORE_RING_VOFFSET/HOFFSET = 1 in config.json this time,
-#     not the old value of 6. ---
+# --- Core ring on Metal4/Metal5 WITH -connect_to_pads ---
 if { $::env(FP_PDN_CORE_RING) == 1 } {
     add_pdn_ring \
         -grid stdcell_grid \
@@ -131,6 +103,11 @@ if { $::env(FP_PDN_CORE_RING) == 1 } {
         -spacings "$::env(FP_PDN_CORE_RING_VSPACING) $::env(FP_PDN_CORE_RING_HSPACING)" \
         -core_offset "$::env(FP_PDN_CORE_RING_VOFFSET) $::env(FP_PDN_CORE_RING_HOFFSET)" \
         -connect_to_pads
+
+    # --- ADDED: Bridge connection between Pad Pin layer (Metal3) and Core Ring (Metal4) ---
+    add_pdn_connect \
+        -grid stdcell_grid \
+        -layers "Metal3 $::env(FP_PDN_VERTICAL_LAYER)"
 }
 
 define_pdn_grid \
