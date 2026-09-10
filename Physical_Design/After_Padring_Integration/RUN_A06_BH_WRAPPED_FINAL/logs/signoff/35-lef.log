@@ -51,7 +51,7 @@ LEF read, Line 310 (Message): Unknown keyword "ANTENNAGATEPLUSDIFF" in LEF file;
 LEF read, Line 315 (Message): Unknown keyword "DENSITYCHECKWINDOW" in LEF file; ignoring.
 LEF read, Line 316 (Message): Unknown keyword "DENSITYCHECKSTEP" in LEF file; ignoring.
 LEF read: Processed 1380 lines.
-Reading DEF data from file /openlane/designs/Markov_Chain_Accelerator/runs/PDN_mqrn_test/results/routing/A06_BH_top_wrapper.def.
+Reading DEF data from file /openlane/designs/Markov_Chain_Accelerator/runs/Mrqn-9-Sept/results/routing/A06_BH_top_wrapper.def.
 This action cannot be undone.
   Processed 4 vias total.
 Cell gf180mcu_fd_sc_mcu7t5v0__tieh read from path /home/user/.ciel/gf180mcuC/libs.ref/gf180mcu_fd_sc_mcu7t5v0/mag
@@ -153,7 +153,7 @@ Cell gf180mcu_fd_sc_mcu7t5v0__buf_3 read from path /home/user/.ciel/gf180mcuC/li
   Processed 12395 nets total.
 DEF read: Processed 213347 lines.
 [INFO]: Writing abstract LEF
-Generating LEF output /openlane/designs/Markov_Chain_Accelerator/runs/PDN_mqrn_test/results/signoff/A06_BH_top_wrapper.lef for cell A06_BH_top_wrapper:
+Generating LEF output /openlane/designs/Markov_Chain_Accelerator/runs/Mrqn-9-Sept/results/signoff/A06_BH_top_wrapper.lef for cell A06_BH_top_wrapper:
 Diagnostic:  Write LEF header for cell A06_BH_top_wrapper
 Diagnostic:  Writing LEF output for cell A06_BH_top_wrapper
 Diagnostic:  Scale value is 0.005000

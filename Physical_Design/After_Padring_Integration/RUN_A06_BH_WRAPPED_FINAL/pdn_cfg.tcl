@@ -4,8 +4,8 @@ source $::env(SCRIPTS_DIR)/openroad/common/set_global_connections.tcl
 set_global_connections
 
 # --- ADDED: Explicit global connections for Pad frame power/ground pins ---
-add_global_connection -net $::env(VDD_NET) -inst_pattern {.*} -pin_pattern {^(VDD|DVDD|VDDIO)$} -power
-add_global_connection -net $::env(GND_NET) -inst_pattern {.*} -pin_pattern {^(VSS|DVSS|VSSIO)$} -ground
+add_global_connection -net $::env(VDD_NET) -inst_pattern {.*} -pin_pattern {^(VDD)$} -power
+add_global_connection -net $::env(GND_NET) -inst_pattern {.*} -pin_pattern {^(VSS)$} -ground
 
 set secondary {}
 foreach vdd $::env(VDD_NETS) gnd $::env(GND_NETS) {
@@ -104,7 +104,10 @@ if { $::env(FP_PDN_CORE_RING) == 1 } {
         -core_offset "$::env(FP_PDN_CORE_RING_VOFFSET) $::env(FP_PDN_CORE_RING_HOFFSET)" \
         -connect_to_pads
 
-    # --- ADDED: Bridge connection between Pad Pin layer (Metal3) and Core Ring (Metal4) ---
+    # --- ADDED: Bridge connection between Pad Pin layer (Metal2) and Core Ring (Metal4) through Metal3 ---
+    add_pdn_connect \
+        -grid stdcell_grid \
+        -layers "Metal2 Metal3"
     add_pdn_connect \
         -grid stdcell_grid \
         -layers "Metal3 $::env(FP_PDN_VERTICAL_LAYER)"
